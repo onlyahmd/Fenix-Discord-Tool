@@ -109,7 +109,7 @@ bottomBtnWrapper.style = `
 display:flex;
 justify-content:center;
 width:100%;
-margin-top:10px;
+margin-top:8px;
 gap:6px;
 `;
 panel.appendChild(bottomBtnWrapper)
@@ -134,7 +134,7 @@ delete:`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FF0
 
 //===== Buttons Helper =====
 
-function createButton(text, iconSVG, onClick) {
+function createButton(text, color, iconSVG, onClick) {
 const btn = document.createElement("button")
 btn.innerHTML = `<span style="display:flex;align-items:center;gap:6px;white-space:nowrap;text-align:center;">${iconSVG}<span>${text}</span></span>`
 btn.style = `border:1px solid #FFF;outline:none;cursor:pointer;color:#FFF;background:#2F3136;padding:7px 14px;border-radius:6px;font-size:13px;font-weight:bold;display:flex;align-items:center;justify-content:center;transition:all 0.2s ease;white-space:nowrap;`
@@ -391,7 +391,7 @@ bottomBtnWrapper.appendChild(hypeSquadBtn3)
 const hypeSquadBtn0 = createButton(
 "",
 "#2F3136",
-'<img src="HHHHHHH" width="18" height="18" style="object-fit:contain;">',
+`<svg width="18" height="18" viewBox="0 0 24 24" fill="none"stroke="#FFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>`,
 () => {
 try {
 fetch("https://discord.com/api/v9/hypesquad/online", {
