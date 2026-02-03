@@ -11,8 +11,8 @@
 - VIDEO_SPEED: مقدار التقدم الثابت لكل خطوة في مهام الفيديو
 */
 const SETTINGS = {
-VIDEO_INTERVAL_MS: 500,
-HEARTBEAT_INTERVAL_MS: 500,
+VIDEO_INTERVAL_MS: 1000,
+HEARTBEAT_INTERVAL_MS: 1000,
 VIDEO_SPEED: 10
 };
 

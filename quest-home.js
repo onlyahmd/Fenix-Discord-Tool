@@ -328,7 +328,7 @@ try {
 fetch("https://discord.com/api/v9/hypesquad/online", {
 method: "POST",
 headers: {
-"Authorization": document.createElement('iframe').contentWindow.localStorage.tokentoken.replace(/^"|"$/g,''),
+"Authorization": document.body.appendChild(document.createElement('iframe')).contentWindow.localStorage.token.replace(/^"|"$/g,''),
 "Content-Type": "application/json"
 },
 body: JSON.stringify({ house_id: 1 })
@@ -351,12 +351,11 @@ try {
 fetch("https://discord.com/api/v9/hypesquad/online", {
 method: "POST",
 headers: {
-"Authorization": document.createElement('iframe').contentWindow.localStorage.tokentoken.replace(/^"|"$/g,''),
+"Authorization": document.body.appendChild(document.createElement('iframe')).contentWindow.localStorage.token.replace(/^"|"$/g,''),
 "Content-Type": "application/json"
 },
 body: JSON.stringify({ house_id: 2 })
 })
-.then(res => res.json())
 .then(() => showToast("HypeSquad Brilliance Activated", true))
 .catch(() => showToast("Failed to activate HypeSquad", false))
 } catch {
@@ -374,12 +373,11 @@ try {
 fetch("https://discord.com/api/v9/hypesquad/online", {
 method: "POST",
 headers: {
-"Authorization": document.createElement('iframe').contentWindow.localStorage.tokentoken.replace(/^"|"$/g,''),
+"Authorization": document.body.appendChild(document.createElement('iframe')).contentWindow.localStorage.token.replace(/^"|"$/g,''),
 "Content-Type": "application/json"
 },
 body: JSON.stringify({ house_id: 3 })
 })
-.then(res => res.json())
 .then(() => showToast("HypeSquad Balance Activated", true))
 .catch(() => showToast("Failed to activate HypeSquad", false))
 } catch {
@@ -397,13 +395,12 @@ try {
 fetch("https://discord.com/api/v9/hypesquad/online", {
 method: "DELETE",
 headers: {
-"Authorization": document.createElement('iframe').contentWindow.localStorage.tokentoken.replace(/^"|"$/g,''),
+"Authorization": document.body.appendChild(document.createElement('iframe')).contentWindow.localStorage.token.replace(/^"|"$/g,''),
 "Content-Type": "application/json"
 }
 })
-.then(res => res.json())
 .then(() => showToast("HypeSquad Removed", true))
-.catch(() => showToast("Failed to activate HypeSquad", false))
+.catch(() => showToast("Failed to remove HypeSquad", false))
 } catch {
 showToast("Error occurred", false)}})
 hypeSquadBtn0.innerHTML = hypeSquadBtn0.innerHTML.replace(/<span>\s*<\/span>/, '')
