@@ -286,19 +286,19 @@ navigator.clipboard.writeText(token)
 } catch {
 showToast("حدث خطأ أثناء تنفيذ الأمر", false)}}))
 
-//===== Validate Password =====
-async function validatePassword(input) {
+//===== Validate Key =====
+async function validateKey(input) {
 try {
-const res = await fetch("https://raw.githubusercontent.com/onlyahmd/Fenix-Discord-Tool/main/password.json");
+const res = await fetch("https://raw.githubusercontent.com/onlyahmd/Fenix-Discord-Tool/main/keys.json");
 const data = await res.json();
-return data.passwords.includes(input);
+return data.keys.includes(input);
 } catch (error) {
 console.error("حدث خطأ أثناء تنفيذ الأمر", error);
 return false;
 }
 }
 
-//===== Run Quest Button with Password =====
+//===== Run Quest Button with Key =====
 const runQuestBtn = createButton("Run Quest", "#2F3136", icons.questRun, () => {
 
 const passBox = document.createElement("div");
@@ -347,7 +347,7 @@ document.getElementById("quest-pass-btn").onclick = async () => {
 const input = document.getElementById("quest-pass-input").value.trim();
 if (!input) return showToast("لم يتم إدخال أي كلمة مرور", false);
 
-const valid = await validatePassword(input);
+const valid = await validateKey(input);
 if (valid) {
 showToast("تم تفعيل الأداة بنجاح", true);
 passBox.remove();
