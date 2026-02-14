@@ -301,7 +301,14 @@ return false;
 //===== Run Quest Button with Key =====
 const runQuestBtn = createButton("Run Quest", "#2F3136", icons.questRun, () => {
 
-const passBox = document.createElement("div");
+let passBox = document.getElementById("quest-pass-box");
+if (passBox) {
+passBox.remove();
+return;
+}
+
+passBox = document.createElement("div");
+passBox = "quest-pass-box";
 passBox.style = `
 background:#202225;
 border:1px solid #FFF;
