@@ -156,24 +156,24 @@ function saveTokens() { localStorage.setItem("discordToolTokens",JSON.stringify(
 
 //===== Validate Tokens (check active/invalid) =====
 async function validateTokens() {
-    if (storedTokens.length === 0) return;
+if (storedTokens.length === 0) return;
 
-    const validTokens = [];
-    for (let tokenObj of storedTokens) {
-        try {
-            const res = await fetch("https://discord.com/api/v9/users/@me", {
-                headers: { Authorization: tokenObj.token }
-            });
-            if (res.ok) validTokens.push(tokenObj); // صالح
-        } catch {}
-    }
+const validTokens = [];
+for (let tokenObj of storedTokens) {
+try {
+const res = await fetch("https://discord.com/api/v9/users/@me", {
+headers: { Authorization: tokenObj.token }
+});
+if (res.ok) validTokens.push(tokenObj)
+} catch {}
+}
 
-    if (validTokens.length !== storedTokens.length) {
-        storedTokens.length = 0;
-        storedTokens.push(...validTokens);
-        saveTokens();
-        showToast("Removed invalid tokens", true);
-    }
+if (validTokens.length !== storedTokens.length) {
+storedTokens.length = 0;
+storedTokens.push(...validTokens);
+saveTokens();
+showToast("تم حذف التوكنات منتهية الصلاحية", true);
+}
 }
 
 //===== Token List =====
@@ -182,7 +182,7 @@ let tokenListContainer = null
 function createTokenList() {
 validateTokens().then(() => {
 if (storedTokens.length === 0 ) {
-showToast("No tokens available!",false)
+showToast("قائمة التوكنات فارغة", false)
 return }
 if (tokenListContainer) {
 validateTokens()
@@ -201,7 +201,7 @@ avatar.src = tokenObj.avatar || "https://cdn.discordapp.com/embed/avatars/0.png"
 avatar.style = "width:28px;height:28px;border-radius:50%;flex-shrink:0;"
 
 let username = document.createElement("span")
-username.textContent = (tokenObj.username || "Unknown")/*.split("#")[0]*/
+username.textContent = (tokenObj.username || "Unknown")
 username.style = "flex:1;font-size:13px;color:#FFF;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-left:6px;font-weight:bold;display:block;"
 
 let btnLogin = document.createElement("button")
@@ -213,10 +213,10 @@ try {
 const iframe = document.createElement("iframe")
 document.body.appendChild(iframe)
 iframe.contentWindow.localStorage.token = `"${tokenObj.token}"`
-showToast(`Logged in as ${tokenObj.username/*.split("#")[0]*/}`, true)
+showToast(`${tokenObj.username} تم تسجيل الدخول إلى`, true)
 setTimeout(() => location.reload(), 1000)
 } catch {
-showToast("Failed to login", false)}}
+showToast("حدث خطأ أثناء تنفيذ الأمر", false)}}
 
 let btnCopy = document.createElement("button")
 btnCopy.innerHTML = icons.tokenCopy
@@ -224,9 +224,8 @@ btnCopy.style = "border:none;background:none;cursor:pointer;"
 btnCopy.title = "Copy Token"
 btnCopy.onclick = () => {
 navigator.clipboard.writeText(tokenObj.token)
-//.then(() => showToast(`Copied ${tokenObj.username/*.split("#")[0]*/}'s token`, true))
-.then(() => showToast(`تم نسخ توكن ${tokenObj.username/*.split("#")[0]*/} من القائمة`, true))
-.catch(() => showToast("Failed to copy token", false))}
+.then(() => showToast(`من القائمة ${tokenObj.username} تم نسخ توكن`, true))
+.catch(() => showToast("حدث خطأ أثناء تنفيذ الأمر", false))}
 
 let btnDelete = document.createElement("button")
 btnDelete.innerHTML = icons.delete
@@ -238,7 +237,7 @@ saveTokens()
 tokenListContainer.remove()
 tokenListContainer = null
 createTokenList()
-showToast(`Deleted ${tokenObj.username/*.split("#")[0]*/}`, true)}
+showToast(`من القائمة ${tokenObj.username} تم حذف توكن`, true)}
 
 item.appendChild(avatar)
 item.appendChild(username)
@@ -266,11 +265,11 @@ token: token,
 username: data.username,
 avatar: data.avatar?`https://cdn.discordapp.com/avatars/${data.id}/${data.avatar}.png` : null })
 saveTokens()
-showToast("Token added successfully", true)})
-.catch(() => showToast("Failed to fetch user info", false))
+showToast("تم حفظ التوكن بنجاح", true)})
+.catch(() => showToast("حدث خطأ أثناء تخزين بيانات الحساب", false))
 } catch {
-showToast("Failed to add token", false)}
-} else showToast("No token entered", false)}))
+showToast("حدث خطأ أثناء تنفيذ الأمر", false)}
+} else showToast("لم يتم إدخال أي توكن", false)}))
 
 btnContainer.appendChild(createButton("Copy Token", "#2F3136", icons.tokenCopy, () => {
 try {
@@ -279,121 +278,95 @@ document.body.appendChild(iframe)
 let token = iframe.contentWindow.localStorage.token || ''
 token = token.replace(/^"|"$/g,'')
 if (!token) {
-showToast("No token to copy", false)
+showToast("لا يمكن الوصول إلى أي توكن", false)
 return }
 navigator.clipboard.writeText(token)
-.then(() => showToast("Token copied", true))
-.catch(() => showToast("Failed to copy token", false))
+.then(() => showToast("تم نسخ التوكن بنجاح", true))
+.catch(() => showToast("حدث خطأ أثناء تنفيذ الأمر", false))
 } catch {
-showToast("Failed to copy token", false)}}))
-/*
-//===== Run Quest Button =====
-
-const runQuestBtn = createButton("Run Quest", "#2F3136", icons.questRun, () => {
-chrome.runtime.sendMessage({ action:'executeQuestCode' }, (response) => {
-if (chrome.runtime.lastError) {
-console.error('Error :', chrome.runtime.lastError)
-showToast("Failed to run quest", false)}
-else if (response&&response.success) {
-showToast("Quest executed", true)}
-else showToast("Failed to run quest", false)})})
-
-btnContainer.appendChild(runQuestBtn)
-*/
-
-
+showToast("حدث خطأ أثناء تنفيذ الأمر", false)}}))
 
 //===== Validate Password =====
 async function validatePassword(input) {
-    try {
-        const res = await fetch("https://raw.githubusercontent.com/onlyahmd/Fenix-Discord-Tool/main/password.json");
-        const data = await res.json();
-        return data.passwords.includes(input);
-    } catch (e) {
-        console.error("Failed to fetch passwords:", e);
-        return false;
-    }
+try {
+const res = await fetch("https://raw.githubusercontent.com/onlyahmd/Fenix-Discord-Tool/main/password.json");
+const data = await res.json();
+return data.passwords.includes(input);
+} catch (error) {
+console.error("حدث خطأ أثناء تنفيذ الأمر", error);
+return false;
+}
 }
 
 //===== Run Quest Button with Password =====
-const runQuestBtn = createButton("Run Quest", "#2F3136", icons.questRun, () => {    
-    const passBox = document.createElement("div");    
-    passBox.style = `    
-        background:#202225;    
-        border:1px solid #FFF;    
-        padding:12px;    
-        border-radius:8px;    
-        display:flex;    
-        flex-direction:column;    
-        gap:8px;    
-        width:100%;    
-    `;    /*
-    passBox.innerHTML = `    
-        <div style="font-size:13px;color:#FFF;">Enter Access Key</div>    
-        <input type="password" id="quest-pass-input" style="    
-            width:100%;padding:6px;border-radius:6px;border:1px solid #444;    
-            background:#111;color:#FFF;outline:none;font-size:13px;    
-        ">    
-        <button id="quest-pass-btn" style="    
-            padding:6px;border-radius:6px;border:1px solid #FFF;    
-            background:#2F3136;color:#FFF;cursor:pointer;font-size:13px;    
-        ">Unlock</button>    
-    `;    
-*/
+const runQuestBtn = createButton("Run Quest", "#2F3136", icons.questRun, () => {
+
+const passBox = document.createElement("div");
+passBox.style = `
+background:#202225;
+border:1px solid #FFF;
+padding:12px;
+border-radius:8px;
+display:flex;
+flex-direction:column;
+gap:8px;
+width:100%;
+`;
 passBox.innerHTML = `
-    <div style="
+<div style="
 font-size:13px;
 color:#FFF;
 ">Enter Access Key</div>
 <input type="password" id="quest-pass-input" 
-    maxlength="100"
-    style="
-        width:100%;
-        padding:6px;
-        border-radius:6px;
-        border:1px solid #444;
-        background:#111;
-        color:#FFF;
-        outline:none;
-        font-size:13px;
-        text-align:center;
-        box-sizing:border-box;
+maxlength="100"
+style="
+width:100%;
+padding:6px;
+border-radius:6px;
+border:1px solid #444;
+background:#111;
+color:#FFF;
+outline:none;
+font-size:13px;
+text-align:center;
+box-sizing:border-box;
 ">
-    <button id="quest-pass-btn" style="
-        padding:6px;
-        border-radius:6px;
-        border:1px solid #FFF;
-        background:#2F3136;
-        color:#FFF;
-        cursor:pointer;
-        font-size:13px;
-    ">Unlock</button>
+<button id="quest-pass-btn" style="
+padding:6px;
+border-radius:6px;
+border:1px solid #FFF;
+background:#2F3136;
+color:#FFF;
+cursor:pointer;
+font-size:13px;
+">Save</button>
 `;
-    panel.appendChild(passBox);    
+panel.appendChild(passBox);
 
-    document.getElementById("quest-pass-btn").onclick = async () => {
-        const input = document.getElementById("quest-pass-input").value.trim();
-        if (!input) return showToast("Please enter a password", false);
+document.getElementById("quest-pass-btn").onclick = async () => {
+const input = document.getElementById("quest-pass-input").value.trim();
+if (!input) return showToast("لم يتم إدخال أي كلمة مرور", false);
 
-        const valid = await validatePassword(input);
-        if (valid) {
-            showToast("Access Granted", true);
-            passBox.remove();
-            // إرسال رسالة للـ background script لتشغيل السكريبت
-            chrome.runtime.sendMessage({ action: 'executeQuestCode' }, (response) => {
-                if (chrome.runtime.lastError) {
-                    console.error('Error:', chrome.runtime.lastError);
-                    showToast("Failed to run quest", false);
-                } else if (response && response.success) {
-                    showToast("Quest executed", true);
-                } else {
-                    showToast("Failed to run quest", false);
-                }
-            });
-        } else {
-            showToast("Invalid password", false);
-        }
-    };
+const valid = await validatePassword(input);
+if (valid) {
+showToast("تم تفعيل الأداة بنجاح", true);
+passBox.remove();
+
+chrome.runtime.sendMessage({ action: 'executeQuestCode' }, (response) => {
+if (chrome.runtime.lastError) {
+console.error("حدث خطأ أثناء تنفيذ الأمر", chrome.runtime.lastError);
+showToast("حدث خطأ أثناء تنفيذ الأمر", false);
+} else if (response && response.success) {
+showToast("تم تنفيذ الكود بنجاح", true);
+} else {
+showToast("حدث خطأ أثناء تنفيذ الأمر", false);
+}
+})
+
+} else {
+showToast("كلمة مرور خاطئة أو غير صالحة", false);
+}
+};
 });
 
 btnContainer.appendChild(runQuestBtn);
@@ -433,10 +406,8 @@ if (svg) svg.style.transform = questListExpanded ? "rotate(180deg)" : "rotate(0d
 if (svg) svg.style.transition = "transform 0.2s ease";
 })
 
-// --- أهم تعديل: إزالة gap للنص ---
-
 expandQuestBtn.innerHTML = expandQuestBtn.innerHTML.replace(/<span>\s*<\/span>/, '')
-expandQuestBtn.style.justifyContent = "center"; // يجعل الأيقونة في منتصف الزر تمامًا
+expandQuestBtn.style.justifyContent = "center";
 
 btnContainer.appendChild(expandQuestBtn)
 
@@ -458,10 +429,10 @@ headers: {
 body: JSON.stringify({ house_id: 1 })
 })
 .then(res => res.json())
-.then(() => showToast("HypeSquad Bravery Activated", true))
-.catch(() => showToast("Failed to activate HypeSquad", false))
+.then(() => showToast("تم تفعيل الشارة بنجاح", true))
+.catch(() => showToast("حدث خطأ أثناء تنفيذ الأمر", false))
 } catch {
-showToast("Error occurred", false)}})
+showToast("حدث خطأ أثناء تنفيذ الأمر", false)}})
 hypeSquadBtn1.innerHTML = hypeSquadBtn1.innerHTML.replace(/<span>\s*<\/span>/, '')
 hypeSquadBtn1.style.justifyContent = "center";
 bottomBtnWrapper.appendChild(hypeSquadBtn1)
@@ -480,10 +451,10 @@ headers: {
 },
 body: JSON.stringify({ house_id: 2 })
 })
-.then(() => showToast("HypeSquad Brilliance Activated", true))
-.catch(() => showToast("Failed to activate HypeSquad", false))
+.then(() => showToast("تم تفعيل الشارة بنجاح", true))
+.catch(() => showToast("حدث خطأ أثناء تنفيذ الأمر", false))
 } catch {
-showToast("Error occurred", false)}})
+showToast("حدث خطأ أثناء تنفيذ الأمر", false)}})
 hypeSquadBtn2.innerHTML = hypeSquadBtn2.innerHTML.replace(/<span>\s*<\/span>/, '')
 hypeSquadBtn2.style.justifyContent = "center";
 bottomBtnWrapper.appendChild(hypeSquadBtn2)
@@ -502,10 +473,10 @@ headers: {
 },
 body: JSON.stringify({ house_id: 3 })
 })
-.then(() => showToast("HypeSquad Balance Activated", true))
-.catch(() => showToast("Failed to activate HypeSquad", false))
+.then(() => showToast("تم تفعيل الشارة بنجاح", true))
+.catch(() => showToast("حدث خطأ أثناء تنفيذ الأمر", false))
 } catch {
-showToast("Error occurred", false)}})
+showToast("حدث خطأ أثناء تنفيذ الأمر", false)}})
 hypeSquadBtn3.innerHTML = hypeSquadBtn3.innerHTML.replace(/<span>\s*<\/span>/, '')
 hypeSquadBtn3.style.justifyContent = "center";
 bottomBtnWrapper.appendChild(hypeSquadBtn3)
@@ -523,10 +494,10 @@ headers: {
 "Content-Type": "application/json"
 }
 })
-.then(() => showToast("HypeSquad Removed", true))
-.catch(() => showToast("Failed to remove HypeSquad", false))
+.then(() => showToast("تم تنفيذ الأمر بنجاح", true))
+.catch(() => showToast("حدث خطأ أثناء تنفيذ الأمر", false))
 } catch {
-showToast("Error occurred", false)}})
+showToast("حدث خطأ أثناء تنفيذ الأمر", false)}})
 hypeSquadBtn0.innerHTML = hypeSquadBtn0.innerHTML.replace(/<span>\s*<\/span>/, '')
 hypeSquadBtn0.style.justifyContent = "center";
 bottomBtnWrapper.appendChild(hypeSquadBtn0)
