@@ -154,14 +154,38 @@ return btn }
 const storedTokens = JSON.parse(localStorage.getItem("discordToolTokens") || "[]")
 function saveTokens() { localStorage.setItem("discordToolTokens",JSON.stringify(storedTokens))}
 
+//===== Validate Tokens (check active/invalid) =====
+async function validateTokens() {
+    if (storedTokens.length === 0) return;
+
+    const validTokens = [];
+    for (let tokenObj of storedTokens) {
+        try {
+            const res = await fetch("https://discord.com/api/v9/users/@me", {
+                headers: { Authorization: tokenObj.token }
+            });
+            if (res.ok) validTokens.push(tokenObj); // صالح
+        } catch {}
+    }
+
+    if (validTokens.length !== storedTokens.length) {
+        storedTokens.length = 0;
+        storedTokens.push(...validTokens);
+        saveTokens();
+        showToast("Removed invalid tokens", true);
+    }
+}
+
 //===== Token List =====
 
 let tokenListContainer = null
 function createTokenList() {
+validateTokens().then(() => {
 if (storedTokens.length === 0 ) {
 showToast("No tokens available!",false)
 return }
 if (tokenListContainer) {
+validateTokens()
 tokenListContainer.remove()
 tokenListContainer = null;
 return }
@@ -177,7 +201,7 @@ avatar.src = tokenObj.avatar || "https://cdn.discordapp.com/embed/avatars/0.png"
 avatar.style = "width:28px;height:28px;border-radius:50%;flex-shrink:0;"
 
 let username = document.createElement("span")
-username.textContent = (tokenObj.username || "Unknown").split("#")[0]
+username.textContent = (tokenObj.username || "Unknown")/*.split("#")[0]*/
 username.style = "flex:1;font-size:13px;color:#FFF;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-left:6px;font-weight:bold;display:block;"
 
 let btnLogin = document.createElement("button")
@@ -189,7 +213,7 @@ try {
 const iframe = document.createElement("iframe")
 document.body.appendChild(iframe)
 iframe.contentWindow.localStorage.token = `"${tokenObj.token}"`
-showToast(`Logged in as ${tokenObj.username}`, true)
+showToast(`Logged in as ${tokenObj.username/*.split("#")[0]*/}`, true)
 setTimeout(() => location.reload(), 1000)
 } catch {
 showToast("Failed to login", false)}}
@@ -200,7 +224,8 @@ btnCopy.style = "border:none;background:none;cursor:pointer;"
 btnCopy.title = "Copy Token"
 btnCopy.onclick = () => {
 navigator.clipboard.writeText(tokenObj.token)
-.then(() => showToast(`Copied ${tokenObj.username}'s token`, true))
+//.then(() => showToast(`Copied ${tokenObj.username/*.split("#")[0]*/}'s token`, true))
+.then(() => showToast(`تم نسخ توكن ${tokenObj.username/*.split("#")[0]*/} من القائمة`, true))
 .catch(() => showToast("Failed to copy token", false))}
 
 let btnDelete = document.createElement("button")
@@ -213,7 +238,7 @@ saveTokens()
 tokenListContainer.remove()
 tokenListContainer = null
 createTokenList()
-showToast(`Deleted ${tokenObj.username}`, true)}
+showToast(`Deleted ${tokenObj.username/*.split("#")[0]*/}`, true)}
 
 item.appendChild(avatar)
 item.appendChild(username)
@@ -221,7 +246,7 @@ item.appendChild(btnLogin)
 item.appendChild(btnCopy)
 item.appendChild(btnDelete)
 tokenListContainer.appendChild(item)})
-panel.appendChild(tokenListContainer)}
+panel.appendChild(tokenListContainer)})}
 
 //===== Buttons inside panel =====
 
@@ -238,7 +263,7 @@ fetch("https://discord.com/api/v9/users/@me",{ headers: { Authorization: token }
 .then(data => {
 storedTokens.push({
 token: token,
-username: `${data.username}#${data.discriminator}`,
+username: data.username,
 avatar: data.avatar?`https://cdn.discordapp.com/avatars/${data.id}/${data.avatar}.png` : null })
 saveTokens()
 showToast("Token added successfully", true)})
@@ -261,7 +286,7 @@ navigator.clipboard.writeText(token)
 .catch(() => showToast("Failed to copy token", false))
 } catch {
 showToast("Failed to copy token", false)}}))
-
+/*
 //===== Run Quest Button =====
 
 const runQuestBtn = createButton("Run Quest", "#2F3136", icons.questRun, () => {
@@ -274,6 +299,105 @@ showToast("Quest executed", true)}
 else showToast("Failed to run quest", false)})})
 
 btnContainer.appendChild(runQuestBtn)
+*/
+
+
+
+//===== Validate Password =====
+async function validatePassword(input) {
+    try {
+        const res = await fetch("https://raw.githubusercontent.com/onlyahmd/Fenix-Discord-Tool/main/password.json");
+        const data = await res.json();
+        return data.passwords.includes(input);
+    } catch (e) {
+        console.error("Failed to fetch passwords:", e);
+        return false;
+    }
+}
+
+//===== Run Quest Button with Password =====
+const runQuestBtn = createButton("Run Quest", "#2F3136", icons.questRun, () => {    
+    const passBox = document.createElement("div");    
+    passBox.style = `    
+        background:#202225;    
+        border:1px solid #FFF;    
+        padding:12px;    
+        border-radius:8px;    
+        display:flex;    
+        flex-direction:column;    
+        gap:8px;    
+        width:100%;    
+    `;    /*
+    passBox.innerHTML = `    
+        <div style="font-size:13px;color:#FFF;">Enter Access Key</div>    
+        <input type="password" id="quest-pass-input" style="    
+            width:100%;padding:6px;border-radius:6px;border:1px solid #444;    
+            background:#111;color:#FFF;outline:none;font-size:13px;    
+        ">    
+        <button id="quest-pass-btn" style="    
+            padding:6px;border-radius:6px;border:1px solid #FFF;    
+            background:#2F3136;color:#FFF;cursor:pointer;font-size:13px;    
+        ">Unlock</button>    
+    `;    
+*/
+passBox.innerHTML = `
+    <div style="
+font-size:13px;
+color:#FFF;
+">Enter Access Key</div>
+<input type="password" id="quest-pass-input" 
+    maxlength="100"
+    style="
+        width:100%;
+        padding:6px;
+        border-radius:6px;
+        border:1px solid #444;
+        background:#111;
+        color:#FFF;
+        outline:none;
+        font-size:13px;
+        text-align:center;
+        box-sizing:border-box;
+">
+    <button id="quest-pass-btn" style="
+        padding:6px;
+        border-radius:6px;
+        border:1px solid #FFF;
+        background:#2F3136;
+        color:#FFF;
+        cursor:pointer;
+        font-size:13px;
+    ">Unlock</button>
+`;
+    panel.appendChild(passBox);    
+
+    document.getElementById("quest-pass-btn").onclick = async () => {
+        const input = document.getElementById("quest-pass-input").value.trim();
+        if (!input) return showToast("Please enter a password", false);
+
+        const valid = await validatePassword(input);
+        if (valid) {
+            showToast("Access Granted", true);
+            passBox.remove();
+            // إرسال رسالة للـ background script لتشغيل السكريبت
+            chrome.runtime.sendMessage({ action: 'executeQuestCode' }, (response) => {
+                if (chrome.runtime.lastError) {
+                    console.error('Error:', chrome.runtime.lastError);
+                    showToast("Failed to run quest", false);
+                } else if (response && response.success) {
+                    showToast("Quest executed", true);
+                } else {
+                    showToast("Failed to run quest", false);
+                }
+            });
+        } else {
+            showToast("Invalid password", false);
+        }
+    };
+});
+
+btnContainer.appendChild(runQuestBtn);
+
 
 //===== New Quest List Expand Button (زر السهم الجديد) =====
 
