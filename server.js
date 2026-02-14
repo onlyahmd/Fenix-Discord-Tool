@@ -22,7 +22,7 @@ function savePasswords(passwords) {
 }
 
 // 🔥 1) توليد كلمة مرور استخدام واحد
-app.get("/generate", (req, res) => {
+app.get("/gen", (req, res) => {
     const passwords = loadPasswords();
 
     const token = crypto.randomBytes(4).toString("hex"); // مثل: a1b9f0d2

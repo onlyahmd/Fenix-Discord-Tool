@@ -591,7 +591,7 @@ btnContainer.appendChild(runQuestBtn)
 */
 async function validatePassword(token) {
     try {
-        const response = await fetch("http://localhost:3000/use", { // غير الرابط لو السيرفر بعيد
+        const response = await fetch("https://curly-space-journey-pj6r6qpjgvqrc6g5p-3000.app.github.dev/use", { // غير الرابط لو السيرفر بعيد
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ token })
