@@ -284,7 +284,7 @@ fetch("https://discord.com/api/v9/users/@me", {
   });
 
   saveTokens();
-  showToast("تم حفظ التوكن الصحيح بنجاح", true);
+  showToast("تم حفظ التوكن بنجاح", true);
 })
 .catch(() => showToast("حدث خطأ أثناء تنفيذ الأمر", false))
 } catch {
