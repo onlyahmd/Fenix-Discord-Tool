@@ -210,9 +210,7 @@ btnLogin.style = "border:none;background:none;cursor:pointer;"
 btnLogin.title = "Login"
 btnLogin.onclick = () => {
 try {
-const iframe = document.createElement("iframe")
-document.body.appendChild(iframe)
-iframe.contentWindow.localStorage.token = `"${tokenObj.token}"`
+document.body.appendChild(document.createElement("iframe")).contentWindow.localStorage.token = `"${tokenObj.token}"`
 showToast(`${tokenObj.username} تم تسجيل الدخول إلى`, true)
 setTimeout(() => location.reload(), 1000)
 } catch {
@@ -250,35 +248,54 @@ panel.appendChild(tokenListContainer)})}
 //===== Buttons inside panel =====
 
 btnContainer.appendChild(createButton("Tokens", "#2F3136", icons.tokens, () => { createTokenList()}))
+
 btnContainer.appendChild(createButton("Add Token", "#2F3136", icons.tokenSet, () => {
 const token = prompt("Enter Your Discord Token :")
-if (token) {
+if (!token) {
+  showToast("لم يتم إدخال أي توكن", false);
+  return;
+}
 try {
-const iframe = document.createElement("iframe")
-document.body.appendChild(iframe)
-iframe.contentWindow.localStorage.token = `"${token}"`
-fetch("https://discord.com/api/v9/users/@me",{ headers: { Authorization: token }})
-.then(res => res.json())
-.then(data => {
-storedTokens.push({
-token: token,
-username: data.username,
-avatar: data.avatar?`https://cdn.discordapp.com/avatars/${data.id}/${data.avatar}.png` : null })
-saveTokens()
-showToast("تم حفظ التوكن بنجاح", true)})
-.catch(() => showToast("حدث خطأ أثناء تخزين بيانات الحساب", false))
+document.body.appendChild(document.createElement("iframe")).contentWindow.localStorage.token = `"${token}"`
+
+fetch("https://discord.com/api/v9/users/@me", {
+  headers: { Authorization: token }
+})
+.then(async (res) => {
+  if (!res.ok) {
+    showToast("التوكن غير صالح أو منتهي الصلاحية", false);
+    return;
+  }
+
+  const data = await res.json();
+
+  const exists = storedTokens.some(t => t.token === token);
+  if (exists) {
+    showToast("التوكن محفوظ بالقائمة من قبل", false);
+    return;
+  }
+
+  storedTokens.push({
+    token: token,
+    username: data.username,
+    avatar: data.avatar
+      ? `https://cdn.discordapp.com/avatars/${data.id}/${data.avatar}.png`
+      : "https://cdn.discordapp.com/embed/avatars/0.png"
+  });
+
+  saveTokens();
+  showToast("تم حفظ التوكن الصحيح بنجاح", true);
+})
+.catch(() => showToast("حدث خطأ أثناء تنفيذ الأمر", false))
 } catch {
 showToast("حدث خطأ أثناء تنفيذ الأمر", false)}
-} else showToast("لم يتم إدخال أي توكن", false)}))
+}))
 
 btnContainer.appendChild(createButton("Copy Token", "#2F3136", icons.tokenCopy, () => {
 try {
-const iframe = document.createElement('iframe')
-document.body.appendChild(iframe)
-let token = iframe.contentWindow.localStorage.token || ''
-token = token.replace(/^"|"$/g,'')
+const token = document.body.appendChild(document.createElement("iframe")).contentWindow.localStorage.token?.replace(/^"|"$/g,'')
 if (!token) {
-showToast("لا يمكن الوصول إلى أي توكن", false)
+showToast("لم يتم العثور على أي توكن", false)
 return }
 navigator.clipboard.writeText(token)
 .then(() => showToast("تم نسخ التوكن بنجاح", true))
@@ -289,7 +306,7 @@ showToast("حدث خطأ أثناء تنفيذ الأمر", false)}}))
 //===== Validate Key =====
 async function validateKey(input) {
 try {
-const res = await fetch("https://raw.githubusercontent.com/onlyahmd/Fenix-Discord-Tool/main/keys.json");
+const res = await fetch("https://raw.githubusercontent.com/onlyahmd/storage/main/keys.json");
 const data = await res.json();
 return data.keys.includes(input);
 } catch (error) {
@@ -298,19 +315,19 @@ return false;
 }
 }
 
-//===== Run Quest Button with Key =====
-const runQuestBtn = createButton("Run Quest", "#2F3136", icons.questRun, () => {
+//===== Global Access Key Box (Reusable) =====
+let globalKeyBox = null;
 
-let passBox = document.getElementById("quest-pass-box");
-
-if (passBox) {
-passBox.remove();
+function requestAccessKey(onSuccess) {
+if (globalKeyBox) {
+globalKeyBox.remove();
+globalKeyBox = null;
 return;
 }
 
-passBox = document.createElement("div");
-passBox.id = "quest-pass-box";
-passBox.style = `
+globalKeyBox = document.createElement("div");
+globalKeyBox.id = "global-access-key-box";
+globalKeyBox.style = `
 background:#202225;
 border:1px solid #FFF;
 padding:12px;
@@ -320,12 +337,12 @@ flex-direction:column;
 gap:8px;
 width:100%;
 `;
-passBox.innerHTML = `
-<div style="
-font-size:13px;
-color:#FFF;
-">Enter Access Key</div>
-<input type="password" id="quest-pass-input" 
+
+globalKeyBox.innerHTML = `
+<div style="font-size:13px;color:#FFF;">
+Enter Access Key
+</div>
+<input type="password" id="global-access-key-input"
 maxlength="100"
 style="
 width:100%;
@@ -339,7 +356,7 @@ font-size:13px;
 text-align:center;
 box-sizing:border-box;
 ">
-<button id="quest-pass-btn" style="
+<button id="global-access-key-btn" style="
 padding:6px;
 border-radius:6px;
 border:1px solid #FFF;
@@ -347,35 +364,48 @@ background:#2F3136;
 color:#FFF;
 cursor:pointer;
 font-size:13px;
-">Save</button>
+">
+Confirm
+</button>
 `;
-panel.appendChild(passBox);
 
-document.getElementById("quest-pass-btn").onclick = async () => {
-const input = document.getElementById("quest-pass-input").value.trim();
+panel.appendChild(globalKeyBox);
+
+document.getElementById("global-access-key-btn").onclick = async () => {
+const input = document.getElementById("global-access-key-input").value.trim();
+
 if (!input) return showToast("لم يتم إدخال أي كلمة مرور", false);
 
 const valid = await validateKey(input);
-if (valid) {
-showToast("تم تفعيل الأداة بنجاح", true);
-passBox.remove();
 
+if (!valid) {
+return showToast("كلمة مرور خاطئة أو غير صالحة", false);
+}
+
+showToast("تم التحقق من المفتاح بنجاح", true);
+globalKeyBox.remove();
+globalKeyBox = null;
+
+if (typeof onSuccess === "function") {
+onSuccess();
+}
+};
+}
+
+//===== Run Quest Button with Key =====
+const runQuestBtn = createButton("Run Quest", "#2F3136", icons.questRun, () => {
+requestAccessKey(() => {
 chrome.runtime.sendMessage({ action: 'executeQuestCode' }, (response) => {
 if (chrome.runtime.lastError) {
-console.error("حدث خطأ أثناء تنفيذ الأمر", chrome.runtime.lastError);
 showToast("حدث خطأ أثناء تنفيذ الأمر", false);
 } else if (response && response.success) {
 showToast("تم تنفيذ الكود بنجاح", true);
 } else {
 showToast("حدث خطأ أثناء تنفيذ الأمر", false);
 }
-})
-
-} else {
-showToast("كلمة مرور خاطئة أو غير صالحة", false);
-}
-};
 });
+});
+})
 
 btnContainer.appendChild(runQuestBtn);
 
@@ -427,20 +457,20 @@ const hypeSquadBtn1 = createButton(
 "#2F3136",
 '<img src="https://cdn.discordapp.com/emojis/1332346706431316039.png" width="18" height="18" style="object-fit:contain;">',
 () => {
+requestAccessKey(() => {
 try {
 fetch("https://discord.com/api/v9/hypesquad/online", {
 method: "POST",
 headers: {
-"Authorization": document.body.appendChild(document.createElement('iframe')).contentWindow.localStorage.token.replace(/^"|"$/g,''),
+"Authorization": document.body.appendChild(document.createElement("iframe")).contentWindow.localStorage.token.replace(/^"|"$/g,''),
 "Content-Type": "application/json"
 },
 body: JSON.stringify({ house_id: 1 })
 })
-.then(res => res.json())
 .then(() => showToast("تم تفعيل الشارة بنجاح", true))
 .catch(() => showToast("حدث خطأ أثناء تنفيذ الأمر", false))
 } catch {
-showToast("حدث خطأ أثناء تنفيذ الأمر", false)}})
+showToast("حدث خطأ أثناء تنفيذ الأمر", false)}})})
 hypeSquadBtn1.innerHTML = hypeSquadBtn1.innerHTML.replace(/<span>\s*<\/span>/, '')
 hypeSquadBtn1.style.justifyContent = "center";
 bottomBtnWrapper.appendChild(hypeSquadBtn1)
@@ -450,11 +480,12 @@ const hypeSquadBtn2 = createButton(
 "#2F3136",
 '<img src="https://cdn.discordapp.com/emojis/1332346710067904593.png" width="18" height="18" style="object-fit:contain;">',
 () => {
+requestAccessKey(() => {
 try {
 fetch("https://discord.com/api/v9/hypesquad/online", {
 method: "POST",
 headers: {
-"Authorization": document.body.appendChild(document.createElement('iframe')).contentWindow.localStorage.token.replace(/^"|"$/g,''),
+"Authorization": document.body.appendChild(document.createElement("iframe")).contentWindow.localStorage.token.replace(/^"|"$/g,''),
 "Content-Type": "application/json"
 },
 body: JSON.stringify({ house_id: 2 })
@@ -462,7 +493,7 @@ body: JSON.stringify({ house_id: 2 })
 .then(() => showToast("تم تفعيل الشارة بنجاح", true))
 .catch(() => showToast("حدث خطأ أثناء تنفيذ الأمر", false))
 } catch {
-showToast("حدث خطأ أثناء تنفيذ الأمر", false)}})
+showToast("حدث خطأ أثناء تنفيذ الأمر", false)}})})
 hypeSquadBtn2.innerHTML = hypeSquadBtn2.innerHTML.replace(/<span>\s*<\/span>/, '')
 hypeSquadBtn2.style.justifyContent = "center";
 bottomBtnWrapper.appendChild(hypeSquadBtn2)
@@ -472,11 +503,12 @@ const hypeSquadBtn3 = createButton(
 "#2F3136",
 '<img src="https://cdn.discordapp.com/emojis/1332346724450304021.png" width="18" height="18" style="object-fit:contain;">',
 () => {
+requestAccessKey(() => {
 try {
 fetch("https://discord.com/api/v9/hypesquad/online", {
 method: "POST",
 headers: {
-"Authorization": document.body.appendChild(document.createElement('iframe')).contentWindow.localStorage.token.replace(/^"|"$/g,''),
+"Authorization": document.body.appendChild(document.createElement("iframe")).contentWindow.localStorage.token.replace(/^"|"$/g,''),
 "Content-Type": "application/json"
 },
 body: JSON.stringify({ house_id: 3 })
@@ -484,7 +516,7 @@ body: JSON.stringify({ house_id: 3 })
 .then(() => showToast("تم تفعيل الشارة بنجاح", true))
 .catch(() => showToast("حدث خطأ أثناء تنفيذ الأمر", false))
 } catch {
-showToast("حدث خطأ أثناء تنفيذ الأمر", false)}})
+showToast("حدث خطأ أثناء تنفيذ الأمر", false)}})})
 hypeSquadBtn3.innerHTML = hypeSquadBtn3.innerHTML.replace(/<span>\s*<\/span>/, '')
 hypeSquadBtn3.style.justifyContent = "center";
 bottomBtnWrapper.appendChild(hypeSquadBtn3)
@@ -494,18 +526,19 @@ const hypeSquadBtn0 = createButton(
 "#2F3136",
 `<svg width="18" height="18" viewBox="0 0 24 24" fill="none"stroke="#FFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>`,
 () => {
+requestAccessKey(() => {
 try {
 fetch("https://discord.com/api/v9/hypesquad/online", {
 method: "DELETE",
 headers: {
-"Authorization": document.body.appendChild(document.createElement('iframe')).contentWindow.localStorage.token.replace(/^"|"$/g,''),
+"Authorization": document.body.appendChild(document.createElement("iframe")).contentWindow.localStorage.token.replace(/^"|"$/g,''),
 "Content-Type": "application/json"
 }
 })
 .then(() => showToast("تم تنفيذ الأمر بنجاح", true))
 .catch(() => showToast("حدث خطأ أثناء تنفيذ الأمر", false))
 } catch {
-showToast("حدث خطأ أثناء تنفيذ الأمر", false)}})
+showToast("حدث خطأ أثناء تنفيذ الأمر", false)}})})
 hypeSquadBtn0.innerHTML = hypeSquadBtn0.innerHTML.replace(/<span>\s*<\/span>/, '')
 hypeSquadBtn0.style.justifyContent = "center";
 bottomBtnWrapper.appendChild(hypeSquadBtn0)
