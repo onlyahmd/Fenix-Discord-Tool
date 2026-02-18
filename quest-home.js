@@ -535,7 +535,7 @@ headers: {
 "Content-Type": "application/json"
 }
 })
-.then(() => showToast("تم تنفيذ الأمر بنجاح", true))
+.then(() => showToast("تم حذف الشارة بنجاح", true))
 .catch(() => showToast("حدث خطأ أثناء تنفيذ الأمر", false))
 } catch {
 showToast("حدث خطأ أثناء تنفيذ الأمر", false)}})})
