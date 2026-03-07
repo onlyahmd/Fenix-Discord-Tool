@@ -19,15 +19,15 @@ console.log("SHA256 Hash:", hex);
 
 const ORIGINAL_HASH = "ضع هنا SHA256 النهائي بعد Obfuscation";
 (async function verifyIntegrity() {
-    const scriptText = document.currentScript.textContent;
-    const encoder = new TextEncoder();
-    const data = encoder.encode(scriptText);
-    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-    const hashHex = Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2,'0')).join('');
-    if(hashHex !== ORIGINAL_HASH) {
-        alert("تم التلاعب بالكود!");
-        throw new Error("Code modified");
-    }
+const scriptText = document.currentScript.textContent;
+const encoder = new TextEncoder();
+const data = encoder.encode(scriptText);
+const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+const hashHex = Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2,'0')).join('');
+if(hashHex !== ORIGINAL_HASH) {
+alert("تم التلاعب بالكود!");
+throw new Error("Code modified");
+}
 })();
 
 //══════[ Anti-Debug / Self-Defending ]══════
@@ -35,12 +35,12 @@ const ORIGINAL_HASH = "ضع هنا SHA256 النهائي بعد Obfuscation";
 // هذا الجزء يراقب إذا حد فتح DevTool أو حاول يوقف الكود بال debugger
 
 (function antiDebug() {
-    const threshold = 160;
-    function detectDevTools() {
-        if(window.outerWidth - window.innerWidth > threshold || window.outerHeight - window.innerHeight > threshold){
-            alert("Debugging detected!");
-            throw new Error("Debugging detected");
-        }
-    }
-    setInterval(detectDevTools, 1000);
+const threshold = 160;
+function detectDevTools() {
+if(window.outerWidth - window.innerWidth > threshold || window.outerHeight - window.innerHeight > threshold){
+alert("Debugging detected!");
+throw new Error("Debugging detected");
+}
+}
+setInterval(detectDevTools, 1000);
 })();

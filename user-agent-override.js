@@ -1,6 +1,20 @@
+// ==UserScript==
+// @name         Fenix Tool Loader
+// @namespace    
+// @version      9.9.9
+// @description  Loads Fenix Tool via @require
+// @author       @onlyahmd
+// @match        https://discord.com/*
+// @run-at       document-idle
+// @grant        none
+// @require      https://cdn.jsdelivr.net/gh/onlyahmd/Fenix-Discord-Tool@main/quest-home.js?v=1
+// ==/UserScript==
+
 (function() {
 
 'use strict'
+
+console.log('Fenix Tool loaded via @require');
 
 const electronUserAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Discord/1.0.0 Chrome/120.0.0.0 Electron/28.0.0 Safari/537.36'
 

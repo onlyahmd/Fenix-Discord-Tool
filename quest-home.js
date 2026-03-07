@@ -1,3 +1,14 @@
+// ==UserScript==
+// @name         Fenix Tool
+// @namespace    
+// @version      9.9.9
+// @description  
+// @author       @onlyahmd
+// @match        https://discord.com/*
+// @run-at       document-end
+// @grant        none
+// ==/UserScript==
+
 (function() {
 
 "use strict"
@@ -252,39 +263,39 @@ btnContainer.appendChild(createButton("Tokens", "#2F3136", icons.tokens, () => {
 btnContainer.appendChild(createButton("Add Token", "#2F3136", icons.tokenSet, () => {
 const token = prompt("Enter Your Discord Token :")
 if (!token) {
-  showToast("لم يتم إدخال أي توكن", false);
-  return;
+showToast("لم يتم إدخال أي توكن", false);
+return;
 }
 try {
 document.body.appendChild(document.createElement("iframe")).contentWindow.localStorage.token = `"${token}"`
 
 fetch("https://discord.com/api/v9/users/@me", {
-  headers: { Authorization: token }
+headers: { Authorization: token }
 })
 .then(async (res) => {
-  if (!res.ok) {
-    showToast("التوكن غير صالح أو منتهي الصلاحية", false);
-    return;
-  }
+if (!res.ok) {
+showToast("التوكن غير صالح أو منتهي الصلاحية", false);
+return;
+}
 
-  const data = await res.json();
+const data = await res.json();
 
-  const exists = storedTokens.some(t => t.token === token);
-  if (exists) {
-    showToast("التوكن محفوظ بالقائمة من قبل", false);
-    return;
-  }
+const exists = storedTokens.some(t => t.token === token);
+if (exists) {
+showToast("التوكن محفوظ بالقائمة من قبل", false);
+return;
+}
 
-  storedTokens.push({
-    token: token,
-    username: data.username,
-    avatar: data.avatar
-      ? `https://cdn.discordapp.com/avatars/${data.id}/${data.avatar}.png`
-      : "https://cdn.discordapp.com/embed/avatars/0.png"
-  });
+storedTokens.push({
+token: token,
+username: data.username,
+avatar: data.avatar
+? `https://cdn.discordapp.com/avatars/${data.id}/${data.avatar}.png`
+: "https://cdn.discordapp.com/embed/avatars/0.png"
+});
 
-  saveTokens();
-  showToast("تم حفظ التوكن بنجاح", true);
+saveTokens();
+showToast("تم حفظ التوكن بنجاح", true);
 })
 .catch(() => showToast("حدث خطأ أثناء تنفيذ الأمر", false))
 } catch {
@@ -306,9 +317,9 @@ showToast("حدث خطأ أثناء تنفيذ الأمر", false)}}))
 //===== Validate Key =====
 async function validateKey(input) {
 try {
-const res = await fetch("https://raw.githubusercontent.com/onlyahmd/storage/main/keys.json");
+const res = await fetch("https://raw.githubusercontent.com/onlyahmd/keys/main/keys.json");
 const data = await res.json();
-return data.keys.includes(input);
+return data.keys.some(k => k.code === input);
 } catch (error) {
 console.error("حدث خطأ أثناء تنفيذ الأمر", error);
 return false;
